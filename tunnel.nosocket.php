@@ -54,7 +54,7 @@ if( !function_exists('apache_request_headers') ) {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'GET')
 {
-    exit("Georg says, 'All seems fine'");
+    exit("Direct access not permited");
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -25,7 +25,7 @@ UNSUPPORTCMD = "\x07"
 ADDRTYPEUNSPPORT = "\x08"
 UNASSIGNED = "\x09"
 
-BASICCHECKSTRING = "Georg says, 'All seems fine'"
+BASICCHECKSTRING = "Direct access not permited"
 
 # Globals
 READBUFSIZE = 1024
@@ -374,7 +374,7 @@ def askGeorg(connectString):
     response = conn.request("GET", httpPath)
     if response.status == 200:
         if BASICCHECKSTRING == response.data.strip():
-            log.info(BASICCHECKSTRING)
+            log.info( "Georg says, 'All seems fine'" )
             return True
     conn.close()
     return False
@@ -398,6 +398,7 @@ if __name__ == '__main__':
     log.setLevel(logging.DEBUG)
     parser = argparse.ArgumentParser(description='Socks server for reGeorg HTTP(s) tunneller')
     parser.add_argument("-l", "--listen-on", metavar="", help="The default listening address", default="127.0.0.1")
+    parser.add_argument("-k", "--insecure", help="Skip certificate validation", action='store_true')
     parser.add_argument("-p", "--listen-port", metavar="", help="The default listening port", type=int, default="8888")
     parser.add_argument("-r", "--read-buff", metavar="", help="Local read buffer, max data to be sent per POST", type=int, default="1024")
     parser.add_argument("-u", "--url", metavar="", required=True, help="The url containing the tunnel script")
@@ -406,6 +407,10 @@ if __name__ == '__main__':
     if (args.verbose in LEVEL):
         log.setLevel(LEVEL[args.verbose])
         log.info("Log Level set to [%s]" % args.verbose)
+
+    if ( args.insecure ):
+        log.info("Skip SSL certificate validation")
+        urllib3.disable_warnings()
 
     log.info("Starting socks server [%s:%d], tunnel at [%s]" % (args.listen_on, args.listen_port, args.url))
     log.info("Checking if Georg is ready")
