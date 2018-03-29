@@ -226,10 +226,10 @@ class session(Thread):
         cookie = None
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
         # response = conn.request("POST", self.httpPath, params, headers)
-        url_cmd_args = "?cmd=connect&target=%s&port=%d"
+        url_cmd_args = "?cmd=connect&target=%s&port=%d" % (target, port)
         if(withoutUrlParams):
             url_cmd_args = ""
-        response = conn.urlopen('POST', self.connectString + url_cmd_args % (target, port), headers=headers, body="")
+        response = conn.urlopen('POST', self.connectString + url_cmd_args , headers=headers, body="")
         if response.status == 200:
             status = response.getheader("x-status")
             if status == "OK":
