@@ -56,6 +56,8 @@ COLORS = {
     'WHITE': WHITE,
 }
 
+withoutUrlParams = False;
+
 
 def formatter_message(message, use_color=True):
     if use_color:
@@ -224,7 +226,10 @@ class session(Thread):
         cookie = None
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
         # response = conn.request("POST", self.httpPath, params, headers)
-        response = conn.urlopen('POST', self.connectString + "?cmd=connect&target=%s&port=%d" % (target, port), headers=headers, body="")
+        url_cmd_args = "?cmd=connect&target=%s&port=%d"
+        if(withoutUrlParams):
+            url_cmd_args = ""
+        response = conn.urlopen('POST', self.connectString + url_cmd_args % (target, port), headers=headers, body="")
         if response.status == 200:
             status = response.getheader("x-status")
             if status == "OK":
@@ -243,7 +248,10 @@ class session(Thread):
         headers = {"X-CMD": "DISCONNECT", "Cookie": self.cookie}
         params = ""
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
-        response = conn.request("POST", self.httpPath + "?cmd=disconnect", params, headers)
+        url_cmd_args = "?cmd=disconnect"
+        if(withoutUrlParams):
+            url_cmd_args = ""
+        response = conn.request("POST", self.httpPath + url_cmd_args, params, headers)
         if response.status == 200:
             log.info("[%s:%d] Connection Terminated" % (self.target, self.port))
         conn.close()
@@ -256,7 +264,10 @@ class session(Thread):
                     break
                 data = ""
                 headers = {"X-CMD": "READ", "Cookie": self.cookie, "Connection": "Keep-Alive"}
-                response = conn.urlopen('POST', self.connectString + "?cmd=read", headers=headers, body="")
+                url_cmd_args = "?cmd=read"
+                if(withoutUrlParams):
+                    url_cmd_args = ""
+                response = conn.urlopen('POST', self.connectString + url_cmd_args, headers=headers, body="")
                 data = None
                 if response.status == 200:
                     status = response.getheader("x-status")
@@ -304,7 +315,10 @@ class session(Thread):
                 if not data:
                     break
                 headers = {"X-CMD": "FORWARD", "Cookie": self.cookie, "Content-Type": "application/octet-stream", "Connection": "Keep-Alive"}
-                response = conn.urlopen('POST', self.connectString + "?cmd=forward", headers=headers, body=data)
+                url_cmd_args = "?cmd=forward"
+                if(withoutUrlParams):
+                    url_cmd_args = ""
+                response = conn.urlopen('POST', self.connectString + url_cmd_args, headers=headers, body=data)
                 if response.status == 200:
                     status = response.getheader("x-status")
                     if status == "OK":
@@ -399,6 +413,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Socks server for reGeorg HTTP(s) tunneller')
     parser.add_argument("-l", "--listen-on", metavar="", help="The default listening address", default="127.0.0.1")
     parser.add_argument("-k", "--insecure", help="Skip certificate validation", action='store_true')
+    parser.add_argument("-d", "--without-url-params", help="Remove cmd args from URL params", action='store_true')
     parser.add_argument("-p", "--listen-port", metavar="", help="The default listening port", type=int, default="8888")
     parser.add_argument("-r", "--read-buff", metavar="", help="Local read buffer, max data to be sent per POST", type=int, default="1024")
     parser.add_argument("-u", "--url", metavar="", required=True, help="The url containing the tunnel script")
@@ -411,6 +426,10 @@ if __name__ == '__main__':
     if ( args.insecure ):
         log.info("Skip SSL certificate validation")
         urllib3.disable_warnings()
+
+    if ( args.without_url_params ):
+        log.info("Remove cmd args from URL params")
+        withoutUrlParams = args.without_url_params
 
     log.info("Starting socks server [%s:%d], tunnel at [%s]" % (args.listen_on, args.listen_port, args.url))
     log.info("Checking if Georg is ready")
