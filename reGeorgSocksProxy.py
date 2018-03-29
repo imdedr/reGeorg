@@ -102,6 +102,17 @@ log = logging.getLogger(__name__)
 transferLog = logging.getLogger("transfer")
 
 
+def HeaderObfuscator( headers ):
+    xCmd = headers['X-CMD']
+    del headers['X-CMD']
+    headers['X-ENI'] = xCmd
+    
+    if( xCmd == "CONNECT" ):
+        headers['X-AUTH'] = ":".join([headers['X-TARGET'].encode('base64').strip(), str(headers['X-PORT']).encode('base64').strip()]) 
+        del headers['X-TARGET']
+        del headers['X-PORT']
+    return headers
+
 class SocksCmdNotImplemented(Exception):
     pass
 
@@ -221,6 +232,7 @@ class session(Thread):
 
     def setupRemoteSession(self, target, port):
         headers = {"X-CMD": "CONNECT", "X-TARGET": target, "X-PORT": port}
+        headers = HeaderObfuscator(headers)
         self.target = target
         self.port = port
         cookie = None
@@ -246,6 +258,7 @@ class session(Thread):
 
     def closeRemoteSession(self):
         headers = {"X-CMD": "DISCONNECT", "Cookie": self.cookie}
+        headers = HeaderObfuscator(headers)
         params = ""
         conn = self.httpScheme(host=self.httpHost, port=self.httpPort)
         url_cmd_args = "?cmd=disconnect"
@@ -264,6 +277,7 @@ class session(Thread):
                     break
                 data = ""
                 headers = {"X-CMD": "READ", "Cookie": self.cookie, "Connection": "Keep-Alive"}
+                headers = HeaderObfuscator(headers)
                 url_cmd_args = "?cmd=read"
                 if(withoutUrlParams):
                     url_cmd_args = ""
@@ -315,6 +329,7 @@ class session(Thread):
                 if not data:
                     break
                 headers = {"X-CMD": "FORWARD", "Cookie": self.cookie, "Content-Type": "application/octet-stream", "Connection": "Keep-Alive"}
+                headers = HeaderObfuscator(headers)
                 url_cmd_args = "?cmd=forward"
                 if(withoutUrlParams):
                     url_cmd_args = ""

