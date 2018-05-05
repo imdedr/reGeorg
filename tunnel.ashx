@@ -100,7 +100,7 @@ public class GenericHandler1 : IHttpHandler, System.Web.SessionState.IRequiresSe
                     }
                 }
             } else {
-                context.Response.Write("Georg says, 'All seems fine'");
+                context.Response.Write("Direct access not permited");
             }
         }
         catch (Exception exKak)
